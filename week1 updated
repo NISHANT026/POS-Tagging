@@ -9,23 +9,23 @@ def parseXML():
  files = ["A1", "A2", "A3","A4","A5","A6","A7", "A8", "A9","AA","AB","AC","AD", "AH", "AJ","AK","AL","AM"]
  Word={}
  Tag={}
-# for x in files:
- path = 'Train-corups/A1'
- for filename in os.listdir(path):
+ for x in files:
+   path = 'Train-corups/'+x
+   for filename in os.listdir(path):
     if not filename.endswith('.xml'): continue
     fullname = os.path.join(path, filename)
     print("\n")
     print(filename)
     tree = ET.parse(fullname)
-   # tree = ET.parse(xmlFile)
+    # tree = ET.parse(xmlFile)
     root = tree.getroot()
     words = []
     for word in root.iter('w'):
         wo=word.get('hw')
         ta=word.get('c5')
-        encoding=wo+" "+ta
-       # encoding = word.get('hw') + " " + word.get('c5')
-       # Word[wo]+=1
+        encoding=wo+"_"+ta
+        # encoding = word.get('hw') + " " + word.get('c5')
+        # Word[wo]+=1
         #Tag[ta]+=1
         words.append(encoding)
         print(encoding)
