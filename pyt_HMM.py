@@ -303,6 +303,52 @@ def viterbiParallelCall(map):
         return 0, 0 ,confusionmatrix, 1
 
 
+def calcStats(confusionMatrix):
+    n = len(tagdict.keys())
+    total = [0 for i in range(n)]
+    truePositives = [0 for i in range(n)]
+    falsePositives = [0 for i in range(n)]
+    falseNegatives = [0 for i in range(n)]
+    recall = [0 for i in range(n)]
+    precision = [0 for i in range(n)]
+    fScore = [0 for i in range(n)]
+    weightedFScore = 0
+
+    avgRecall = 0
+    avgPrecision = 0
+    avgFScore = 0
+    absTotal = 0
+
+    for i in range(n):
+        for j in range(n):
+            if i==j:
+                truePositives[i] += confusionMatrix[i][j]
+            else:
+                falseNegatives[i] += confusionMatrix[i][j]
+                falsePositives[j] += confusionMatrix[i][j]
+            total[i] += confusionMatrix[i][j]
+    
+    for i in range(n):
+        recall[i] = truePositives[i]/(truePositives[i]+falseNegatives[i])
+        precision[i] = truePositives[i]/(truePositives[i]+falsePositives[i])
+        fScore[i] = 2* (precision[i]*recall[i])/(precision[i]+recall[i])
+
+        avgRecall += recall[i]
+        avgPrecision += precision[i]
+        avgFScore += fScore[i]
+        weightedFScore += total[i]*fScore[i]
+
+        absTotal += total[i]
+
+    avgRecall = avgRecall/n
+    avgPrecision = avgPrecision/n
+    avgFScore = avgFScore/n
+    weightedFScore = weightedFScore/absTotal
+
+    return avgRecall, avgPrecision, avgFScore, weightedFScore
+
+
+
 def runHMMonTestData():
     correct = 0
     total = 0
@@ -358,7 +404,9 @@ def runHMMonTestData():
                     
     print(correct/total*100)
     print(errors)
-    print(confusionMatrix)
+    # print(confusionMatrix)
+    stats = calcStats(confusionMatrix)
+    print(stats)
 
 
 
