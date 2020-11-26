@@ -282,22 +282,35 @@ def viterbiParallelCall(map):
     actualTagSeq = map["actualTagSeq"]
     total = 0
     correct = 0
+    n = len(tagdict.keys())
+    confusionmatrix=[[0 for i in range(n)] for j in range(n)]
+
     try:
         predictedTagSeq = HMMViterbi(sentence)
         for i in range(len(predictedTagSeq)):
             total += 1
             if actualTagSeq[i].find(predictedTagSeq[i]) != -1:
                 correct +=1
-        return total, correct
+            if actualTagSeq[i].find('-') != -1:
+                ta = actualTagSeq[i].split('-')
+                confusionmatrix[tagIds[ta[0]]][tagIds[predictedTagSeq[i]]] += 1
+                confusionmatrix[tagIds[ta[1]]][tagIds[predictedTagSeq[i]]] += 1
+            else:
+                confusionmatrix[tagIds[actualTagSeq[i]]][tagIds[predictedTagSeq[i]]] += 1
+        return total, correct, confusionmatrix, 0
+
     except:
-        return 0,0
+        return 0, 0 ,confusionmatrix, 1
 
 
 def runHMMonTestData():
     correct = 0
     total = 0
-    files = ["AN", "AP", "AR","AS","AT","AY"]
     errors = 0
+    files = ["AN"]#, "AP", "AR","AS","AT","AY"]
+    errors = 0
+    maps = []
+
 
     for x in files:
         path = 'Test-corpus/'+x
@@ -309,7 +322,6 @@ def runHMMonTestData():
             tree = ET.parse(fullname)
 
             root = tree.getroot()
-            maps = []
             sentence = []
             actualTagSeq = []
             for element in root.iter():
@@ -333,11 +345,21 @@ def runHMMonTestData():
     pool = multiprocessing.Pool() 
     outputs_async = pool.map_async(viterbiParallelCall, maps)
     outputs = outputs_async.get()
+    n = len(tagdict.keys())
+    confusionMatrix = [[0 for i in range(n)] for j in range(n)]
     for i in range(len(outputs)):
         total += outputs[i][0]
         correct += outputs[i][1]
+        errors += outputs[i][3]
+        newConfuionMatrix = outputs[i][2]
+        for j in range(n):
+            for k in range(n):
+                confusionMatrix[j][k] += newConfuionMatrix[j][k]
                     
     print(correct/total*100)
+    print(errors)
+    print(confusionMatrix)
+
 
 
 
